@@ -2,13 +2,28 @@ import Base: +, -, *, /
 
 function +(x::Node{T}, y::Node{T}) where {T <: Number}
     data = x.value + y.value
-    # print(x)
-    # print(y)
     inputs = [x, y]
     function backward(z_grad::T)
         return [z_grad, z_grad]
     end
-    # println(Operation(inputs, data, backward, "+"))
+    return Operation(inputs, data, backward, "+")
+end
+
+function -(x::Node{T}, y::Node{T}) where {T <: Number}
+    data = x.value - y.value
+    inputs = [x, y]
+    function backward(z_grad::T)
+        return [z_grad, -z_grad]
+    end
+    return Operation(inputs, data, backward, "-")
+end
+
+function Base.:+(x::Node{T}, y::Node{T}) where {T <: AbstractArray}
+    data = x.value .+ y.value
+    inputs = [x, y]
+    function backward(z_grad::T)
+        return [z_grad, z_grad]
+    end
     return Operation(inputs, data, backward, "+")
 end
 

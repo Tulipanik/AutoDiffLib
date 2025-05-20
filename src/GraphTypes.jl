@@ -4,7 +4,7 @@ mutable struct Variable{T} <: Node{T}
     value::T
     grad::T
     name::String
-    Variable(val::T, name::String="") where {T <: AbstractArray} = new{T}(val, 0.0, name)
+    Variable(val::T, name::String="") where {T <: AbstractArray} = new{T}(val, zero(val), name)
     Variable(val::T, name::String="") where {T <: Number} = new{T}(val, zero(val), name)
 end
 

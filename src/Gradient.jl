@@ -1,6 +1,6 @@
 function backward(output::Node{T}) where {T}
-    println(output)
     output.grad = init_grad(output.value)
+    print(output)
     visited = Set{Node{T}}()
     order = topological_sort(output, visited, Vector{Node{T}}())
     reversed_order = reverse(order)
