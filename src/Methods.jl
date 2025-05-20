@@ -1,24 +1,86 @@
-import Base: +, -, *, /
+import Base: +, -, *, /, ^, sin, cos, tan, cot, sec, csc, exp, log, max
 
-function +(x::Node{T}, y::Node{T}) where {T <: Number}
+# scalar methods
+function +(x::Node{T}, y::Node{T}) where {T<:Number}
     data = x.value + y.value
     inputs = [x, y]
-    function backward(z_grad::T)
-        return [z_grad, z_grad]
-    end
-    return Operation(inputs, data, backward, "+")
+    return Operation(inputs, data, z_grad::T -> [z_grad, z_grad], "+")
 end
 
-function -(x::Node{T}, y::Node{T}) where {T <: Number}
+function -(x::Node{T}, y::Node{T}) where {T<:Number}
     data = x.value - y.value
     inputs = [x, y]
-    function backward(z_grad::T)
-        return [z_grad, -z_grad]
-    end
-    return Operation(inputs, data, backward, "-")
+    return Operation(inputs, data, z_grad::T -> [z_grad, -z_grad], "-")
 end
 
-function Base.:+(x::Node{T}, y::Node{T}) where {T <: AbstractArray}
+function *(x::Node{T}, y::Node{T}) where {T<:Number}
+    data = x.value * y.value
+    inputs = [x, y]
+    return Operation(inputs, data, z_grad::T -> [y.value * z_grad, x.value * z_grad], "*")
+end
+
+function /(x::Node{T}, y::Node{T}) where {T<:Number}
+    data = x.value / y.value
+    inputs = [x, y]
+    return Operation(inputs, data, z_grad::T -> [z_grad / y.value, -(x.value * z_grad) / y.value^2], "/")
+end
+
+function ^(x::Node{T}, y::Node{T}) where {T<:Number}
+    data = x.value ^ y.value
+    inputs = [x, y]
+    return Operation(inputs, data, z_grad::T -> [y.value*x.value^(y.value-1), log(x.value)*x.value^y.value], "^")
+end
+
+function exp(x::Node{T}) where {T<:Number}
+    data = exp(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [z_grad*exp(x.value)], "exp")
+end
+
+function log(x::Node{T}) where {T<:Number}
+    data = log(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [z_grad*(1/x.value)], "log")
+end
+
+function sin(x::Node{T}) where {T<:Number}
+    data = sin(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [z_grad*cos(x.value)], "sin")
+end
+
+function cos(x::Node{T}) where {T<:Number}
+    data = cos(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [z_grad*-sin(x.value)], "cos")
+end
+
+function tan(x::Node{T}) where {T<:Number}
+    data = tan(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [z_grad/cos(x.value)^2], "tan")
+end
+
+function cot(x::Node{T}) where {T<:Number}
+    data = cot(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [-z_grad/sin(x.value)^2], "cot")
+end
+
+function sec(x::Node{T}) where {T<:Number}
+    data = sec(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [z_grad*sec(x.value)*tan(x.value)], "sec")
+end
+
+function csc(x::Node{T}) where {T<:Number}
+    data = csc(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [-z_grad*cot(x.value)*csc(x.value)], "csc")
+end
+
+# matrix methods
+function +(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
     data = x.value .+ y.value
     inputs = [x, y]
     function backward(z_grad::T)
@@ -27,20 +89,32 @@ function Base.:+(x::Node{T}, y::Node{T}) where {T <: AbstractArray}
     return Operation(inputs, data, backward, "+")
 end
 
-# function Base.:+(x::Node, y::Node)
-#     data = x.value .+ y.value
-#     inputs = [x, y]
-#     return Operation("+", inputs, data, zero(data), σ-> [σ, σ])
-# end
+function -(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
+    data = x.value .- y.value
+    inputs = [x, y]
+    function backward(z_grad::T)
+        return [z_grad, -z_grad]
+    end
+    return Operation(inputs, data, backward, "-")
+end
 
-# function Base.:-(x::Node, y::Node)
-#     data = x.value .- y.value
-#     inputs = [x, y]
-#     function backward(z_grad::AbstractArray{Float64})
-#         return [z_grad, -z_grad]
-#     end
-#     return Operation("-", inputs, data, zero(data), backward)
-# end
+function *(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
+    data = x.value * y.value
+    inputs = [x, y]
+    function backward(z_grad::T)
+        return [y.value * z_grad, x.value * z_grad]
+    end
+    return Operation(inputs, data, backward, "*")
+end
+
+function /(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
+    data = x.value / y.value
+    inputs = [x, y]
+    function backward(z_grad::T)
+        return [z_grad / y.value, -(x.value * z_grad) / y.value^2]
+    end
+    return Operation(inputs, data, backward, "/")
+end
 
 # function Base.sum(x::Node; dims=:)
 #     data = sum(x.value, dims=dims)

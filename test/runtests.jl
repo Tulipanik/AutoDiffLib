@@ -1,38 +1,15 @@
 using AutoDiffLib
 using Test
 
-@testset "AutoDiffLib.jl" begin
-    x_data = 2.0
-    y_data = 3.0
-    x = Variable(x_data, "x")
-    y = Variable(y_data, "y")
-    
-    z = x + y + x
-    
-    backward(z)
-    
-    @test x.grad == 2.0
-    @test y.grad == 1.0
-    
-    x = Variable(x_data, "x")
-    y = Variable(y_data, "y")
-    z = x - y - x
-    
-    backward(z)
-    
-    @test x.grad == 0.0
-    @test y.grad == -1.0
-    
-    x_data = [1.0 2.0; 3.0 4.0]
-    y_data = [5.0 6.0; 7.0 8.0]
-    x = Variable(x_data, "x")
-    y = Variable(y_data, "y")
-    
-    z = x + y + x
-    backward(z)
+include("./scalar_tests/additionTest.jl")
+include("./scalar_tests/substractionTest.jl")
+include("./scalar_tests/multiplicationTest.jl")
+include("scalar_tests/divisionTest.jl")
+include("scalar_tests/exponentioationTest.jl")
+include("scalar_tests/logarithmTest.jl")
+include("scalar_tests/trigonometryTest.jl")
 
-    @test x.grad == [2.0 2.0; 2.0 2.0]
-    @test y.grad == [1.0 1.0; 1.0 1.0]
-
-
-end
+include("./matrix_tests/additionTest.jl")
+include("matrix_tests/substractionTest.jl")
+# include("matrix_tests/multiplicationTest.jl")
+# include("matrix_tests/divisionTest.jl")

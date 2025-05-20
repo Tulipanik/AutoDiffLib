@@ -1,27 +1,13 @@
-function visit(node::Node, visited, order)
-    if node ∈ visited
-    else
-        push!(visited, node)
-        push!(order, node)
+function topological_sort(node::Node{T}, visited::Set{Node{T}}, order::Vector{Node{T}}) where {T}
+    if node in visited
+        return
     end
-    return nothing
-end
-    
-function visit(node::Operation, visited, order)
-    if node ∈ visited
-    else
-        push!(visited, node)
+    push!(visited, node)
+    if node isa Operation{T}
         for input in node.inputs
-            visit(input, visited, order)
+            topological_sort(input, visited, order)
         end
-        push!(order, node)
     end
-    return nothing
-end
-
-function topological_sort(head::Node)
-    visited = Set()
-    order = Vector()
-    visit(head, visited, order)
+    push!(order, node)
     return order
 end
