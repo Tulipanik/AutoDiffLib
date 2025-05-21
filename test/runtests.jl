@@ -8,6 +8,8 @@ include("scalar_tests/divisionTest.jl")
 include("scalar_tests/exponentioationTest.jl")
 include("scalar_tests/logarithmTest.jl")
 include("scalar_tests/trigonometryTest.jl")
+include("scalar_tests/maxTest.jl")
+include("scalar_tests/otherTest.jl")
 
 include("./matrix_tests/additionTest.jl")
 include("matrix_tests/substractionTest.jl")

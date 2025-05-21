@@ -79,23 +79,45 @@ function csc(x::Node{T}) where {T<:Number}
     return Operation(inputs, data, z_grad::T -> [-z_grad*cot(x.value)*csc(x.value)], "csc")
 end
 
-# matrix methods
+function max(x::Node{T}, y::Node{T}) where {T<:Number}
+    data = max(x.value, y.value)
+    inputs = [x, y]
+    if x.value > y.value
+        return Operation(inputs, data, z_grad::T -> [z_grad, 0], "max")
+    elseif y.value > x.value
+        return Operation(inputs, data, z_grad::T -> [0, z_grad], "max")
+    else
+        return Operation(inputs, data, z_grad::T -> [z_grad/2, z_grad/2], "max")
+    end
+end
+
+function Sigmoid(x::Node{T}) where {T<:Number}
+    data = Sigmoid(x.value)
+    inputs = [x]
+    return Operation(inputs, data, z_grad::T -> [z_grad*data*(1-data)], "Sigmoid")
+end
+
+function ReLU(x::Node{T}) where {T<:Number}
+    data = max(x.value)
+    inputs = [x]
+    if x.value > 0
+        return Operation(inputs, data, z_grad::T -> [z_grad], "ReLU")
+    else
+        return Operation(inputs, data, z_grad::T -> [0], "ReLU")
+    end
+end
+
+# matrix and matrix/scalar methods
 function +(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
     data = x.value .+ y.value
     inputs = [x, y]
-    function backward(z_grad::T)
-        return [z_grad, z_grad]
-    end
-    return Operation(inputs, data, backward, "+")
+    return Operation(inputs, data, z_grad::T -> [z_grad, z_grad], "+")
 end
 
 function -(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
     data = x.value .- y.value
     inputs = [x, y]
-    function backward(z_grad::T)
-        return [z_grad, -z_grad]
-    end
-    return Operation(inputs, data, backward, "-")
+    return Operation(inputs, data, z_grad::T -> [z_grad, -z_grad], "-")
 end
 
 function *(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
@@ -115,12 +137,3 @@ function /(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
     end
     return Operation(inputs, data, backward, "/")
 end
-
-# function Base.sum(x::Node; dims=:)
-#     data = sum(x.value, dims=dims)
-#     inputs = [x]
-#     function backward(z_grad::AbstractArray{Float64})
-#         return [fill(z_grad, size(x.value))]
-#     end
-#     return Operation("sum", inputs, data, zero(data), backward)
-# end

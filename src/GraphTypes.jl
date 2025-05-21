@@ -8,7 +8,7 @@ mutable struct Variable{T} <: Node{T}
     Variable(val::T, name::String="") where {T <: Number} = new{T}(val, zero(val), name)
 end
 
-struct Constant{T <: AbstractArray} <: Node{T}
+struct Constant{T} <: Node{T}
     value::T
 end
 
