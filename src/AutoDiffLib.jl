@@ -8,6 +8,6 @@ include("Sort.jl")
 
 export Variable, Constant
 export Sigmoid, ReLU
-export backward
+export gradient, backward
 
 end
