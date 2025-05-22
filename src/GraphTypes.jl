@@ -20,4 +20,6 @@ mutable struct Operation{T} <: Node{T}
     backward::Function
     Operation(inputs::Vector{<:Node{T}}, value::T, backward::Function, op_name::String="") where {T <: Number} = new{T}(op_name, inputs, value, zero(value), backward)
     Operation(inputs::Vector{<:Node{T}}, value::T, backward::Function, op_name::String="") where {T <: AbstractArray} = new{T}(op_name, inputs, value, zeros(size(value)), backward)
+    # Operation(inputs::Vector{<:Node{T1}}, value::T2, backward::Function, op_name::String="") where {T1 <: Number, T2 <: AbstractArray} = new{T}(op_name, inputs, value, zeros(size(value)), backward)
+    # Operation(inputs::Vector{<:Node}, value::T, backward::Function, op_name::String="") where {T <: AbstractArray} = new{T}(op_name, inputs, value, zeros(size(value)), backward)
 end

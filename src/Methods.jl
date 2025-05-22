@@ -107,7 +107,6 @@ function ReLU(x::Node{T}) where {T<:Number}
     end
 end
 
-# matrix and matrix/scalar methods
 function +(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
     data = x.value .+ y.value
     inputs = [x, y]
@@ -120,20 +119,52 @@ function -(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
     return Operation(inputs, data, z_grad::T -> [z_grad, -z_grad], "-")
 end
 
-function *(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
+function *(x::Node{<:AbstractArray}, y::Node{<:AbstractArray})
     data = x.value * y.value
     inputs = [x, y]
-    function backward(z_grad::T)
-        return [y.value * z_grad, x.value * z_grad]
-    end
-    return Operation(inputs, data, backward, "*")
+    return Operation(inputs, data, z_grad::AbstractArray -> [z_grad * y.value', x.value' * z_grad], "*")
 end
 
-function /(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
+function Base.Broadcast.broadcasted(::typeof(*), x::Node{<:AbstractArray}, y::Node{<:AbstractArray})
+    data = x.value .* y.value
+    inputs = [x, y]
+    return Operation(inputs, data, z_grad::AbstractArray -> [z_grad .* y.value, z_grad .* x.value], ".*")
+end
+
+function Base.Broadcast.broadcasted(::typeof(*), x::Node{<:Number}, y::Node{<:AbstractArray})
+    data = x.value .* y.value
+    inputs = [x, y]
+    return Operation(inputs, data, z_gard -> [sum(z_grad .* y.value), z_grad .* x.value], ".*")
+end
+
+function Base.Broadcast.broadcasted(::typeof(*), x::Node{<:AbstractArray}, y::Node{<:Number})
+    data = x.value .* y.value
+    inputs = Node[x, y]
+    return Operation(inputs, data, z_gard -> [z_grad .* y.value, sum(z_grad .* x.value)], ".*")
+end
+
+function /(x::Node{<:AbstractArray}, y::Node{<:AbstractArray})
     data = x.value / y.value
     inputs = [x, y]
-    function backward(z_grad::T)
-        return [z_grad / y.value, -(x.value * z_grad) / y.value^2]
-    end
-    return Operation(inputs, data, backward, "/")
+    Yinv = inv(y.value)
+    return Operation(inputs, data, z_grad::AbstractArray -> [z_grad * Yinv', -x.value' * z_grad * Yinv'], "/")
+end
+
+
+function Base.Broadcast.broadcasted(::typeof(/), x::Node{<:AbstractArray}, y::Node{<:AbstractArray})
+    data = x.value ./ y.value
+    inputs = [x, y]
+    return Operation(inputs, data, z_grad -> [z_grad ./ y.value, -z_grad .* x.value ./ (y.value .^ 2)], "./")
+end
+
+function Base.Broadcast.broadcasted(::typeof(/), x::Node{<:AbstractArray}, y::Node{<:Number})
+    data = x.value ./ y.value
+    inputs = [x, y]
+    return Operation(inputs, data, z_grad -> [z_grad ./ y.value, -sum(z_grad .* x.value) / y.value^2], "./")
+end
+
+function Base.Broadcast.broadcasted(::typeof(/), x::Node{<:Number}, y::Node{<:AbstractArray})
+    data = x.value ./ y.value
+    inputs = [x, y]
+    return Operation(inputs, data, z_grad -> [sum(z_grad ./ y.value), -z_grad .* x.value ./ (y.value .^ 2)], "./")
 end
