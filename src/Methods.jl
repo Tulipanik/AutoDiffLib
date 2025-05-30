@@ -279,11 +279,11 @@ end
 function ReLU(x::Node{<:AbstractArray})
     data = ReLU.(x.value)
     inputs = [x]
-    return Operation(inputs, data, z_grad::AbstractArray -> z_grad .* (x.value .>= 0), (x) -> ReLU.(x.value), ".ReLU")
+    return Operation(inputs, data, z_grad::AbstractArray -> [z_grad .* (x.value .>= 0)], (x) -> ReLU.(x.value), ".ReLU")
 end
 
 function Sigmoid(x::Node{<:AbstractArray})
     data = Sigmoid.(x.value)
     inputs = [x]
-    return Operation(inputs, data, z_grad::AbstractArray -> z_grad .* data .* (1 .- data), (x) -> Sigmoid.(x.value), ".Sigmoid")
+    return Operation(inputs, data, z_grad::AbstractArray -> [z_grad .* data .* (1 .- data)], (x) -> Sigmoid.(x.value), ".Sigmoid")
 end

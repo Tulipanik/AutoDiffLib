@@ -25,7 +25,7 @@ include("matrix_tests/divisionTest.jl")
 
     x = Variable([1.0, 2.0], "x")
 
-    z = mean(W * x + b)
+    z = Sigmoid(W * x + b)
 
     z2 = @toposort z
 
