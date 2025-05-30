@@ -6,8 +6,10 @@ include("Methods.jl")
 include("Gradient.jl")
 include("Sort.jl")
 
-export Variable, Constant
+export Variable, Constant, Node
 export Sigmoid, ReLU
-export gradient, backward
+export backward!
+export @toposort, topological_sort
+export mean
 
 end

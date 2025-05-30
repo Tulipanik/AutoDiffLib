@@ -4,8 +4,8 @@
     x = Variable(x_data, "x")
     y = Variable(y_data, "y")
     
-    z = x - y - x
-    backward(z)
+    z = @toposort x - y - x
+    backward!(z)
 
     @test x.grad == [0.0 0.0; 0.0 0.0]
     @test y.grad == -[1.0 1.0; 1.0 1.0]

@@ -4,8 +4,8 @@
     x = Variable(x_data, "x")
     y = Variable(y_data, "y")
     
-    z = max(x, y)
-    backward(z)
+    z = @toposort max(x, y)
+    backward!(z)
 
     @test x.grad == 0
     @test y.grad == 1
@@ -15,8 +15,8 @@
     x = Variable(x_data, "x")
     y = Variable(y_data, "y")
     
-    z = max(x, y)
-    backward(z)
+    z = @toposort max(x, y)
+    backward!(z)
 
     @test x.grad == 1
     @test y.grad == 0
@@ -26,8 +26,8 @@
     x = Variable(x_data, "x")
     y = Variable(y_data, "y")
     
-    z = max(x, y)
-    backward(z)
+    z = @toposort max(x, y)
+    backward!(z)
 
     @test x.grad == 0.5
     @test y.grad == 0.5

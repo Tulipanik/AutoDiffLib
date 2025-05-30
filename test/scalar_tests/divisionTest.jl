@@ -6,8 +6,8 @@
     x = Variable(x_data, "x")
     y = Variable(y_data, "y")
 
-    z = y / x
-    backward(z)
+    z = @toposort y / x
+    backward!(z)
     
     @test x.grad == -0.75
     @test y.grad == 0.5

@@ -5,6 +5,7 @@ function ReLU(x::Number)
     return 0
 end
 
+
 function Sigmoid(x::Number)
     return 1/(1+exp(-x))
 end
