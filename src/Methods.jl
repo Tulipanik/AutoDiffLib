@@ -5,7 +5,6 @@ promote_to_node(x::Node) = x
 promote_to_node(x::Number) = Constant(x)
 promote_to_node(x::AbstractArray) = Constant(x)
 
-# scalar methods
 function +(x::Node{T}, y::Node{T}) where {T<:Number}
     data = x.value + y.value
     inputs = [x, y]
@@ -134,8 +133,6 @@ end
 function +(x::Node{<:AbstractArray}, y::Node{<:AbstractArray})
     x_val, y_val = x.value, y.value
 
-    # @show "siema"
-
     foward = (a, b) -> begin
         a_sz = size(a)
         b_sz = size(b)
@@ -164,14 +161,8 @@ function +(x::Node{<:AbstractArray}, y::Node{<:AbstractArray})
 
     data = foward(x_val, y_val)
     inputs = [x, y]
-    # @show size(x.grad)
-    # @show size(y)
 
     function backward(z_grad)
-        # @show "siemano"
-        # @show size(x.grad)
-        # @show size(y.grad)
-        # @show size(z_grad)
         x_shape = size(x.value)
         y_shape = size(y.value)
 
@@ -179,18 +170,18 @@ function +(x::Node{<:AbstractArray}, y::Node{<:AbstractArray})
         gy = reshape(sum(z_grad, dims=setdiff(1:ndims(z_grad), findall(y_shape .!= 1))), y_shape)
         return [gx, gy]
     end
-    return Operation(inputs, data, backward, foward, "+bjbjb")
+    return Operation(inputs, data, backward, foward, "+")
 end
 
 function +(x::Node{<:Number}, y::Node{<:AbstractArray})
     data = fill(x.value, size(y.value)) .+ y.value
     inputs = [x, y]
-    return Operation(inputs, data, z_grad -> [z_grad, z_grad], (x, y) -> fill(x.value, size(y.value)) .+ y.value, "+jguu")
+    return Operation(inputs, data, z_grad -> [z_grad, z_grad], (x, y) -> fill(x.value, size(y.value)) .+ y.value, "+")
 end
 
 
-# +(x::AbstractArray, y::Node{T}) where {T<:AbstractArray} = promote_to_node(x) + y
-# +(x::Node{T}, y::AbstractArray) where {T<:AbstractArray} = x + promote_to_node(y)
++(x::AbstractArray, y::Node{T}) where {T<:AbstractArray} = promote_to_node(x) + y
++(x::Node{T}, y::AbstractArray) where {T<:AbstractArray} = x + promote_to_node(y)
 
 function -(x::Node{T}, y::Node{T}) where {T<:AbstractArray}
     data = x.value .- y.value
@@ -260,11 +251,8 @@ function Base.Broadcast.broadcasted(::typeof(/), x::Node{<:Number}, y::Node{<:Ab
 end
 
 function Base.Broadcast.broadcasted(::typeof(^), x::Node{<:AbstractArray}, y::Node{<:Number})
-    # println("siema")
     data = x.value .^ y.value
-    # println(data)
     inputs = [x, y]
-    # println("siema")
     return Operation(inputs, data, z_grad::AbstractArray -> [
             z_grad .* (y.value .* (x.value .^ (y.value - 1))),
             sum(z_grad .* (data .* log.(max.(x.value, eps()))))

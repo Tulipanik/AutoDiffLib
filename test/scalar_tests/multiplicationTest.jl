@@ -1,5 +1,3 @@
-# skonsultować
-
 @testset "Multiplication Scalar" begin
     x_data = 2.0
     y_data = 3.0

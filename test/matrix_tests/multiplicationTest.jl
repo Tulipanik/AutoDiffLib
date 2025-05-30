@@ -42,15 +42,4 @@
 
     @test x.grad == [5.0 6.0]
     @test y.grad == [2.0 4.0]
-
-    # x_data = 2.0
-    # y_data = [5.0; 6.0]
-    # x = Variable(x_data, "x")
-    # y = Variable(y_data, "y")
-    
-    # z = x .* y
-    # backward(z)
-
-    # @test x.grad == [11.0 15.0]
-    # @test y.grad == [2.0 2.0; 4.0 4.0]
 end

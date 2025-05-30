@@ -1,5 +1,3 @@
-# skonsultować
-
 @testset "Division Scalar" begin
     x_data = 2.0
     y_data = 3.0
