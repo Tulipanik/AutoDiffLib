@@ -262,7 +262,7 @@ end
 function log(x::Node{<:AbstractArray})
     data = log.(x.value)
     inputs = [x]
-    return Operation(inputs, data, z_grad::AbstractArray -> z_grad .* (1 ./ x.value), (x) -> log.(x.value), ".log")
+    return Operation(inputs, data, z_grad::AbstractArray -> [z_grad .* (1 ./ x.value)], (x) -> log.(x.value), ".log")
 end
 
 function mean(x::Node{<:AbstractArray})
